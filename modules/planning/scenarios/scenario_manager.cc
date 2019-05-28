@@ -167,7 +167,8 @@ ScenarioConfig::ScenarioType ScenarioManager::SelectPullOverScenario(
 
   bool pull_over_scenario =
       (frame.reference_line_info().size() == 1 &&  // NO, while changing lane
-       adc_distance_to_dest > 0.0 &&
+       adc_distance_to_dest >=
+           scenario_config.max_pull_over_scenario_distance() &&
        adc_distance_to_dest <=
            scenario_config.start_pull_over_scenario_distance());
 
@@ -906,14 +907,11 @@ void ScenarioManager::UpdatePlanningContextTrafficLightScenario(
   }
 }
 
-
 // update: pull_over status in PlanningContext
 void ScenarioManager::UpdatePlanningContextPullOverScenario(
     const Frame& frame, const ScenarioConfig::ScenarioType& scenario_type) {
   if (scenario_type != ScenarioConfig::PULL_OVER) {
-    PlanningContext::Instance()
-        ->mutable_planning_status()
-        ->clear_pull_over();
+    PlanningContext::Instance()->mutable_planning_status()->clear_pull_over();
     return;
   }
 }
