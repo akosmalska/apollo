@@ -88,12 +88,12 @@ done
 
 APOLLO_ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd -P )"
 
-if [ "$(readlink -f /apollo2)" != "${APOLLO_ROOT_DIR}" ]; then
-    sudo ln -snf ${APOLLO_ROOT_DIR} /apollo2
+if [ "$(readlink -f /apollo)" != "${APOLLO_ROOT_DIR}" ]; then
+    sudo ln -snf ${APOLLO_ROOT_DIR} /apollo
 fi
 
 if [ -e /proc/sys/kernel ]; then
-    echo "/apollo2/data/core/core_%e.%p" | sudo tee /proc/sys/kernel/core_pattern > /dev/null
+    echo "/apollo/data/core/core_%e.%p" | sudo tee /proc/sys/kernel/core_pattern > /dev/null
 fi
 
 source ${APOLLO_ROOT_DIR}/scripts/apollo_base.sh
@@ -231,7 +231,7 @@ function main(){
     docker ps -a --format "{{.Names}}" | grep "$APOLLO_DEV" 1>/dev/null
     if [ $? == 0 ]; then
         docker stop $APOLLO_DEV 1>/dev/null
-        docker rm -v -f $APOLLO_DEV 1>/dev/null
+#        docker rm -v -f $APOLLO_DEV 1>/dev/null
     fi
 
     if [ "$FAST_BUILD_MODE" == "no" ]; then
@@ -295,41 +295,43 @@ function main(){
         USE_GPU=0
     fi
 
-    ${DOCKER_CMD} run -it \
-        -d \
-        --privileged \
-        --name $APOLLO_DEV \
-        ${MAP_VOLUME_CONF} \
-        ${OTHER_VOLUME_CONF} \
-        -e DISPLAY=$display \
-        -e DOCKER_USER=$USER \
-        -e USER=$USER \
-        -e DOCKER_USER_ID=$USER_ID \
-        -e DOCKER_GRP="$GRP" \
-        -e DOCKER_GRP_ID=$GRP_ID \
-        -e DOCKER_IMG=$IMG \
-        -e USE_GPU=$USE_GPU \
-        $(local_volumes) \
-        --net host \
-        -w /apollo2 \
-        --env HTTP_PROXY="http://ksproxy.esk.fraunhofer.de:3128" \
-        --env HTTPS_PROXY="https://ksproxy.esk.fraunhofer.de:3128" \
-        --add-host in_dev_docker:127.0.0.1 \
-        --add-host ${LOCAL_HOST}:127.0.0.1 \
-        --hostname in_dev_docker \
-        --shm-size 2G \
-        --pid=host \
-        -v /dev/null:/dev/raw1394 \
-        $IMG \
-        /bin/bash
+#    ${DOCKER_CMD} run -it \
+#        -d \
+#        --privileged \
+#        --name $APOLLO_DEV \
+#        ${MAP_VOLUME_CONF} \
+#        ${OTHER_VOLUME_CONF} \
+#        -e DISPLAY=$display \
+#        -e DOCKER_USER=$USER \
+#        -e USER=$USER \
+#        -e DOCKER_USER_ID=$USER_ID \
+#        -e DOCKER_GRP="$GRP" \
+#        -e DOCKER_GRP_ID=$GRP_ID \
+#        -e DOCKER_IMG=$IMG \
+#        -e USE_GPU=$USE_GPU \
+#        $(local_volumes) \
+#        --net host \
+#        -w /apollo \
+#        --env HTTP_PROXY="http://ksproxy.esk.fraunhofer.de:3128" \
+#        --env HTTPS_PROXY="https://ksproxy.esk.fraunhofer.de:3128" \
+#        --add-host in_dev_docker:127.0.0.1 \
+#        --add-host ${LOCAL_HOST}:127.0.0.1 \
+#        --hostname in_dev_docker \
+#        --shm-size 2G \
+#        --pid=host \
+#        -v /dev/null:/dev/raw1394 \
+#        $IMG \
+#        /bin/bash
+
+docker exec -it $APOLLO_DEV /bin/bash
 
     if [ $? -ne 0 ];then
-        error "Failed to start docker container \"${APOLLO_DEV}\" based on image: $IMG"
+        error "Failed to start existing docker container \"${APOLLO_DEV}\" based on image: $IMG"
         exit 1
     fi
 
     if [ "${USER}" != "root" ]; then
-        docker exec $APOLLO_DEV bash -c '/apollo2/scripts/docker_adduser.sh'
+        docker exec $APOLLO_DEV bash -c '/apollo/scripts/docker_adduser.sh'
     fi
 
     ok "Finished setting up Apollo docker environment. Now you can enter with: \nbash docker/scripts/dev_into.sh"

@@ -1,5 +1,6 @@
 # Bazel
 bazel-apollo
+bazel-apollo2
 bazel-apollo_dev
 bazel-bin
 bazel-genfiles

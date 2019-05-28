@@ -108,6 +108,8 @@ function main() {
         -e DOCKER_IMG=$IMG \
         -e PYTHONPATH=/apollo/lib \
         ${devices} \
+        --env HTTP_PROXY="http://ksproxy.esk.fraunhofer.de:3128" \
+        --env HTTPS_PROXY="https://ksproxy.esk.fraunhofer.de:3128" \
         --add-host in_release_docker:127.0.0.1 \
         --add-host ${LOCAL_HOST}:127.0.0.1 \
         --hostname in_release_docker \
